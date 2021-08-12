@@ -1,0 +1,19 @@
+{
+   "type": "mssql",
+   "host": "localhost",
+   "port": 1433,
+   "username": "sa",
+   "password": "ASDlkj123\\][",
+   "database": "test",
+   "synchronize": false,
+   "logging": false,
+   "entities": [
+      "./entities/*.js"
+   ],
+   "options": {
+      "trustedConnection": true,
+      "encrypt": true,
+      "enableArithAbort": true,
+      "trustServerCertificate": true
+   }
+}
