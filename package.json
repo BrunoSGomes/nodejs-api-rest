@@ -13,8 +13,8 @@
     "consign": "^0.1.6",
     "date-fns": "^2.23.0",
     "express": "^4.17.1",
-    "mssql": "^7.2.0",
-    "typeorm": "^0.2.36"
+    "mssql": "^7.3.0",
+    "typeorm": "^0.2.41"
   },
   "devDependencies": {
     "nodemon": "^2.0.12"
