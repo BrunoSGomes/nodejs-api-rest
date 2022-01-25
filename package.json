@@ -11,8 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "consign": "^0.1.6",
-    "date-fns": "^2.23.0",
-    "express": "^4.17.1",
+    "date-fns": "^2.28.0",
+    "express": "^4.17.2",
     "mssql": "^7.3.0",
     "typeorm": "^0.2.41"
   },

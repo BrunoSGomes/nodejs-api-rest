@@ -1,4 +1,5 @@
 {
+   "name": "sqlserver",
    "type": "mssql",
    "host": "localhost",
    "port": 1433,

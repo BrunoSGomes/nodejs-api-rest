@@ -1,80 +1,73 @@
-const getConnection = require('typeorm').getConnection
 const dateParse = require('date-fns').parse
 const isAfter = require('date-fns').isAfter
-const atendimentoRepository = require('../entities/atendimento.entity')
+const Repository = require('../infra/database/queries')
 
 class Atendimento {
-    saveAtendimento(atendimento, res) {
-        const creationDate = new Date()
-        const serviceDate = dateParse(atendimento.serviceDate, 'dd/MM/yyyy', new Date())
-        const isValidDate = isAfter(serviceDate, creationDate)
-        const isValidClient = atendimento.name.length >= 5
-        const validations = [
+    constructor() {
+        this.isValidDate = ({ serviceDate, creationDate }) => isAfter(serviceDate, creationDate)
+        this.isValidClient = ({ length }) => length >= 5
+        this.validation = (params) => this.validations.filter((field) => {
+            const { name } = field
+            const param = params[name]
+
+            return !field.valid(param)
+        })
+        this.validations = [
             {
-                name: 'data',
-                valid: isValidDate,
+                name: 'date',
+                valid: this.isValidDate,
                 message: 'Data deve ser maior ou igual a data atual'
             },
             {
-                name: 'cliente',
-                valid: isValidClient,
+                name: 'client',
+                valid: this.isValidClient,
                 message: 'Cliente deve ter pelo menos cinco caracteres'
             }
         ]
-        const errors = validations.filter(validation => !validation.valid)
+    }
+
+    saveAtendimento(atendimento) {
+        const serviceDate = dateParse(atendimento.serviceDate, 'dd/MM/yyyy', new Date())
+        const creationDate = new Date()
+
+        const params = {
+            date: { serviceDate, creationDate },
+            client: { length: atendimento.name.length }
+        }
+        const errors = this.validation(params)
         const haveError = errors.length
+
         if (haveError) {
-            res.status(400).json(errors)
+            return new Promise((resolve, reject) => reject(errors))
         } else {
             const completeAtendimento = { ...atendimento, creationDate, serviceDate }
-            const getRepository = getConnection('default').getRepository(atendimentoRepository)
-            getRepository.save(completeAtendimento)
-                .then(response => {
-                    res.status(201).json(response)
-                }).catch(err => {
-                    res.status(400).json(err)
-                })
+            return Repository.saveAtendimento(completeAtendimento)
+                .then((response) => { return response })
         }
     }
 
-    getAtendimentosList(res) {
-        getConnection('default').getRepository(atendimentoRepository).find()
-            .then(response => {
-                res.status(200).json(response)
-            }).catch(err => {
-                res.status(400).json(err)
-            })
+    getAtendimentosList() {
+        return Repository.getAtendimentosList()
+            .then((response) => { return response })
     }
 
-    getUniqAtendimento(id, res) {
-        getConnection('default').getRepository(atendimentoRepository).findOne({ id: id })
-            .then(response => {
-                res.status(200).json(response)
-            }).catch(err => {
-                res.status(400).json(err)
-            })
+    getUniqAtendimento(id) {
+        return Repository.getUniqAtendimento(id)
+            .then((response) => { return response })
     }
 
-    updateAtendimento(id, values, res) {
+    updateAtendimento(id, values) {
         if (values.serviceDate) {
             values.serviceDate = dateParse(values.serviceDate, 'dd/MM/yyyy', new Date())
         }
-        getConnection('default').getRepository(atendimentoRepository).save({ id: id, ...values })
-            .then(response => {
-                res.status(200).json(response)
-            }).catch(err => {
-                res.status(400).json(err)
-            })
+        return Repository.updateAtendimento(id, values)
+            .then((response) => { return response })
     }
 
-    deleteAtendimento(id, res) {
-        getConnection('default').getRepository(atendimentoRepository).delete({ id: id })
-            .then(() => {
-                res.status(200).json({ id })
-            }).catch(err => {
-                res.status(400).json(err)
-            })
+    deleteAtendimento(id) {
+        return Repository.deleteAtendimento(id)
+            .then((response) => { return response })
     }
 }
 
-module.exports = new Atendimento
+module.exports = new Atendimento()
